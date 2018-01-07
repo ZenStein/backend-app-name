@@ -247,11 +247,11 @@ function filterName(obj){
 // console.log('test', test)
 // })
 
-router.use(function (req, res, next) {
-  console.log('Time:', Date.now())
-  res.header('Access-Control-Allow-Origin', '*');
-  next()
-})
+// router.use(function (req, res, next) {
+//   console.log('Time:', Date.now())
+//   res.header('Access-Control-Allow-Origin', '*');
+//   next()
+// })
 router.post('/',
 // function(req, res, next){
 //   res.header('Access-Control-Allow-Origin', '*');
