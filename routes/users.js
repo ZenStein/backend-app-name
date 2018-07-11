@@ -338,10 +338,11 @@ function (req, res) {
          var name = $this.find('span.f8').text()
          var numberLinens = $this.find('span.f24').text()
          //console.log((name.match(/ /g) || []).length)
-        if ((name.match(/ /g) || []).length != 1) {
-           console.log('name= ', name)
-           console.log(new Error('extraa space inside name'))
-         }
+        // if ((name.match(/ /g) || []).length != 1) {
+        //    console.log('name= ', name)
+        //    console.log(new Error('extraa space inside name'))
+        //  }
+         name = name.trim()
          var nameArr = name.split(' ')
          var firstName = nameArr[0].trim()
          var lastName = nameArr[1].trim()
@@ -510,7 +511,7 @@ function (req, res) {
     const tos = data.filter((d)=>{
       return d.status === 'Arr' && d.turnover === true
     }).map((d2) =>{
-      return {cabin:d2.cabin, status:'T.O.', linens: d2.linensNumber}
+      return {cabin: d2.cabin, status: 'T.O.', linens: d2.linensNumber}
     })
     const arrivalsNumbers = data.filter((d)=>{
       return d.status === 'Arr'
