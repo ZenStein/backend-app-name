@@ -168,7 +168,7 @@ function filterCabin(obj){
   var newObj = obj.map(function(anObj){
     var cabinString = anObj.cabin
     var dex = cabinString.indexOf('-')
-    console.log('cabinstring', cabinString.substring(0,dex).replace(/[ #]/g, ''))
+    //console.log('cabinstring', cabinString.substring(0,dex).replace(/[ #]/g, ''))
     var filtered = parseInt(cabinString.substring(0,dex).replace(/[ #]/g, ''), 10)
     //console.log('filtered',filtered)
     anObj.cabin = filtered
@@ -179,14 +179,14 @@ function filterCabin(obj){
 function filterName(obj){
   var newObj = obj.map(function(anObj){
     var name = anObj.name
-    var filteredName = name.replace(/[^A-Za-z ,-]/g, '')
+    var filteredName = name.replace(/[^A-Za-z,-]/g, '')
     filteredName = filteredName.split(',')
     if(filteredName.length >= 3){
       console.log(new Error('there is a comma on the name'))
     }
    // console.log(filteredName)
-    anObj.firstName = filteredName[1].trim()
-    anObj.lastName = filteredName[0].trim()
+    anObj.firstName = filteredName[1].replace(/\s/g,"")
+    anObj.lastName = filteredName[0].replace(/\s/g,"")
 
    // console.log(filteredName)
     //anObj.name = filteredName
@@ -260,14 +260,18 @@ router.post('/',
 upload.array('files', 3),
 function (req, res) {
     function getContacts(err, data){
+      //console.log('yoyoyoyo')
       //console.log(data.toString().split('\n'))
       var newObj = []
       var contactsArrayOfStr = data.toString().split('\n')
       contactsArrayOfStr.forEach(function(contactStr){
         contactArr = contactStr.replace(/["]+/g, '').split(',')
+        //console.log('contactArr', contactArr)
+        
+      if(contactArr.length > 2){        
         var contact = {
-          firstName: contactArr[0],
-          lastName: contactArr[1],
+          firstName: contactArr[0].replace(/\s/g,''),
+          lastName: contactArr[1].replace(/\s/g,''),
           address: contactArr[2],
           city: contactArr[4],
           state: contactArr[5],
@@ -280,12 +284,15 @@ function (req, res) {
           turnover: false,
           linensNumber: 0
         }
+        //console.log('contact', contact)
         newObj.push(contact)
         // contacts.create(contact).then(function(err, data){
         //   console.log('created contact 1')
         // //  console.log(err, data)
         // })
+        }
       })
+      //console.log("newObj", newObj)
       return newObj
     }
     function getActives(err, data){
@@ -335,13 +342,13 @@ function (req, res) {
       var linensObj = []
       var test = $('.s11').find("span:contains('Linen')").parent().nextUntil('.s12').each(function(){
          var $this = $(this);
-         var name = $this.find('span.f8').text()
+         var name = $this.find('span.f8').text() || "NO NAME"
          var numberLinens = $this.find('span.f24').text()
-         //console.log((name.match(/ /g) || []).length)
-        // if ((name.match(/ /g) || []).length != 1) {
-        //    console.log('name= ', name)
-        //    console.log(new Error('extraa space inside name'))
-        //  }
+         console.log((name.match(/ /g) || []).length)
+        if ((name.match(/ /g) || []).length != 1) {
+           console.log('name= ', name)
+           console.log(new Error('extraa space inside name'))
+         }
          name = name.trim()
          var nameArr = name.split(' ')
          var firstName = nameArr[0].trim()
@@ -488,15 +495,22 @@ function (req, res) {
     var contactsFile = fs.readFileSync(getFilePathByName(req.files, 'Contacts.csv'), 'utf8')
     var activeFile = fs.readFileSync(getFilePathByName(req.files, 'OccupancyActive List.htm'), 'utf8')
     var posFile = fs.readFileSync(getFilePathByName(req.files, 'Point of SaleDetail.htm'), 'utf8')
+    //console.log("herheehereh")
     //AO stands for arrayOfObjects
     var contactsAO = getContacts(null, contactsFile)
+    console.log("HERE 1", contactsAO)
     var activeAO = getActives(null, activeFile)
+    console.log("HERE 2")
     var posAO = getPOS(null, posFile)
+    console.log("HERE 3")
     var finalizedData = mergeAllData(contactsAO, activeAO, posAO)
+    console.log("HERE 4")
     finalizedData = removeCabinNullsAndStayovers(finalizedData)
+    console.log("HERE 5")
     finalizedData = calculateTOBool(finalizedData)
+    console.log("HERE 6")
     finalizedData = addLinenToStrictDeparts(finalizedData)
-    //console.log(finalizedData)
+    console.log("FINALIZED:", finalizedData)
     const data = finalizedData
     const arrivals = data.filter((d) => {
       return d.status === 'Arr' && d.turnover === false
